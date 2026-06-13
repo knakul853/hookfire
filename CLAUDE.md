@@ -20,6 +20,7 @@ A Go CLI that fires correctly-signed synthetic webhook events at a URL. **Thesis
 - **Go 1.24** is pinned in `go.mod`. Don't let `go get` bump the `go`/`toolchain` directive; pin deps to 1.24-compatible versions.
 - **Lint is golangci-lint v2** (`.golangci.yml` is v2 schema); CI uses `golangci-lint-action@v7`. No speculative `//nolint`.
 - Tests that hit config resolution must `t.Setenv("XDG_CONFIG_HOME", t.TempDir())` to stay hermetic (don't read the dev's real `~/.config`).
+- **One test file per source file:** `foo.go` → `foo_test.go`, holding the tests for the functions defined in `foo.go`. No per-method files (`method_test.go`) and no grab-bag files (`extra_test.go`, `coverage_test.go`) — they drift and rot. Shared test helpers live once in the test file of the source they most belong to.
 
 ## Commands
 `make test` (race) · `make e2e` · `make lint` · `make cover` · `make verify` · `make mocks` · `make build`.
