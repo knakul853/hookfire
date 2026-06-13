@@ -1,0 +1,8 @@
+{
+  "ref": "refs/heads/main",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "{{uuid}}",
+  "repository": { "id": 1, "name": "hello-world", "full_name": "octocat/hello-world" },
+  "pusher": { "name": "octocat", "email": "octocat@example.com" },
+  "head_commit": { "id": "{{uuid}}", "timestamp": "{{now}}", "message": "Initial commit" }
+}

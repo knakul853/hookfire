@@ -1,0 +1,4 @@
+{
+  "id": "evt_{{uuid}}", "object": "event", "type": "payment_intent.succeeded", "created": {{timestamp}},
+  "data": { "object": { "id": "pi_{{uuid}}", "object": "payment_intent", "amount": 2000, "currency": "usd", "status": "succeeded" } }
+}

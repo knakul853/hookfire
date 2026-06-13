@@ -1,0 +1,4 @@
+{
+  "id": "{{uuid}}", "type": "deployment.ready", "createdAt": {{timestamp}},
+  "payload": { "deployment": { "id": "dpl_{{uuid}}", "name": "my-app", "url": "my-app.vercel.app" }, "target": "production" }
+}

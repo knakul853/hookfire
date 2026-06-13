@@ -1,0 +1,14 @@
+name: stripe
+description: Stripe webhooks
+homepage: https://stripe.com/docs/webhooks/signatures
+transport:
+  method: POST
+  content_type: application/json
+signing:
+  scheme: hmac
+  algorithm: sha256
+  encoding: hex
+  secret_source: "env:STRIPE_WEBHOOK_SECRET"
+  basestring: "{{timestamp}}.{{body}}"
+  output: "t={{timestamp}},v1={{sig}}"
+  header: "Stripe-Signature"
