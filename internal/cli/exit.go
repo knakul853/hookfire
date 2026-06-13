@@ -8,6 +8,11 @@ import (
 	"github.com/knakul853/hookfire/internal/sign"
 )
 
+// errUsage marks a user-input/usage error (unknown target alias, missing URL,
+// malformed --set/--header). SPEC §7 maps these to exit 2 alongside unknown
+// provider/event.
+var errUsage = errors.New("usage error")
+
 // transportError marks a failure to reach the target (exit 4).
 type transportError struct{ err error }
 
@@ -24,7 +29,7 @@ func exitCodeFor(err error) int {
 	switch {
 	case err == nil:
 		return 0
-	case errors.Is(err, provider.ErrUnknownProvider), errors.Is(err, provider.ErrUnknownEvent):
+	case errors.Is(err, provider.ErrUnknownProvider), errors.Is(err, provider.ErrUnknownEvent), errors.Is(err, errUsage):
 		return 2
 	case errors.Is(err, sign.ErrMissingSecret), errors.Is(err, sign.ErrUnsupportedScheme), errors.Is(err, sign.ErrInvalidConfig):
 		return 3

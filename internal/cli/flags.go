@@ -49,14 +49,14 @@ func parseSets(sets, setStrings []string) ([]render.Set, error) {
 	for _, s := range sets {
 		k, v, ok := strings.Cut(s, "=")
 		if !ok {
-			return nil, fmt.Errorf("--set %q must be path=value", s)
+			return nil, fmt.Errorf("%w: --set %q must be path=value", errUsage, s)
 		}
 		out = append(out, render.Set{Path: k, Value: v})
 	}
 	for _, s := range setStrings {
 		k, v, ok := strings.Cut(s, "=")
 		if !ok {
-			return nil, fmt.Errorf("--set-string %q must be path=value", s)
+			return nil, fmt.Errorf("%w: --set-string %q must be path=value", errUsage, s)
 		}
 		out = append(out, render.Set{Path: k, Value: v, ForceString: true})
 	}
@@ -68,7 +68,7 @@ func parseHeaders(hs []string) (map[string]string, error) {
 	for _, h := range hs {
 		k, v, ok := strings.Cut(h, "=")
 		if !ok {
-			return nil, fmt.Errorf("--header %q must be k=v", h)
+			return nil, fmt.Errorf("%w: --header %q must be k=v", errUsage, h)
 		}
 		out[k] = v
 	}

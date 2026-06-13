@@ -1,12 +1,7 @@
 package cli
 
 import (
-	"fmt"
-	"log/slog"
-
-	"github.com/knakul853/hookfire/internal/config"
 	"github.com/knakul853/hookfire/internal/fire"
-	"github.com/knakul853/hookfire/internal/sign"
 	"github.com/knakul853/hookfire/internal/ui"
 	"github.com/spf13/cobra"
 )
@@ -42,29 +37,9 @@ func newShowCmd() *cobra.Command {
 // runTrigger resolves config/secret, runs the pipeline, renders the view, and
 // returns the pipeline error (mapped to an exit code by Run). show forces dryRun.
 func runTrigger(cmd *cobra.Command, f *commonFlags, providerName, event string, forceDryRun bool) error {
-	cat, err := buildCatalog(f.providersDir, func(name, src string) {
-		slog.Warn("filesystem provider shadows a built-in", "provider", name, "source", src)
-	})
+	cat, tgt, url, err := resolveTarget(f)
 	if err != nil {
 		return err
-	}
-
-	cfg := loadConfig()
-	var tgt config.Target
-	if f.target != "" {
-		t, ok := cfg.Target(f.target)
-		if !ok {
-			return fmt.Errorf("unknown target alias %q", f.target)
-		}
-		tgt = t
-	}
-
-	url := f.url
-	if url == "" {
-		url = tgt.URL
-	}
-	if url == "" {
-		return fmt.Errorf("no target URL: pass --url or -t <alias> with a configured url")
 	}
 
 	manifest, _, err := cat.Lookup(providerName, event)
@@ -72,26 +47,9 @@ func runTrigger(cmd *cobra.Command, f *commonFlags, providerName, event string, 
 		return suggestErr(cat, providerName, event, err)
 	}
 
-	if f.secret != "" {
-		slog.Warn("--secret exposes the secret in shell history; prefer --secret-env")
-	}
-	if f.insecure {
-		slog.Warn("--insecure disables TLS verification")
-	}
-
-	var secret config.Secret
-	if !f.noSign && manifest.Signing.Scheme != "none" {
-		s, src, rerr := config.ResolveSecret(config.EnvResolver{}, config.ResolveInput{
-			LiteralSecret:   f.secret,
-			SecretEnvFlag:   f.secretEnv,
-			TargetSecretEnv: tgt.SecretEnv,
-			ManifestSource:  manifest.Signing.SecretSource,
-		})
-		if rerr != nil {
-			return fmt.Errorf("%w: %v", sign.ErrMissingSecret, rerr)
-		}
-		secret = s
-		slog.Debug("resolved signing secret", "source", src)
+	secret, err := resolveSecret(f, tgt, manifest)
+	if err != nil {
+		return err
 	}
 
 	sets, err := parseSets(f.sets, f.setStrings)

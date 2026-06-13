@@ -2,13 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 
-	"github.com/knakul853/hookfire/internal/config"
 	"github.com/knakul853/hookfire/internal/fire"
 	"github.com/knakul853/hookfire/internal/provider"
-	"github.com/knakul853/hookfire/internal/sign"
 	"github.com/knakul853/hookfire/internal/ui"
 	"github.com/spf13/cobra"
 )
@@ -35,28 +32,9 @@ func newReplayCmd() *cobra.Command {
 // runReplay reads a saved payload verbatim (no rendering, no --set), signs it
 // with the named provider's scheme, and fires it. The body is sent byte-for-byte.
 func runReplay(cmd *cobra.Command, f *commonFlags, providerName, file string) error {
-	cat, err := buildCatalog(f.providersDir, func(name, src string) {
-		slog.Warn("filesystem provider shadows a built-in", "provider", name, "source", src)
-	})
+	cat, tgt, url, err := resolveTarget(f)
 	if err != nil {
 		return err
-	}
-
-	cfg := loadConfig()
-	var tgt config.Target
-	if f.target != "" {
-		t, ok := cfg.Target(f.target)
-		if !ok {
-			return fmt.Errorf("unknown target alias %q", f.target)
-		}
-		tgt = t
-	}
-	url := f.url
-	if url == "" {
-		url = tgt.URL
-	}
-	if url == "" {
-		return fmt.Errorf("no target URL: pass --url or -t <alias> with a configured url")
 	}
 
 	manifest, err := cat.Manifest(providerName)
@@ -69,22 +47,9 @@ func runReplay(cmd *cobra.Command, f *commonFlags, providerName, file string) er
 		return fmt.Errorf("cli: read replay file: %w", err)
 	}
 
-	if f.secret != "" {
-		slog.Warn("--secret exposes the secret in shell history; prefer --secret-env")
-	}
-	var secret config.Secret
-	if !f.noSign && manifest.Signing.Scheme != "none" {
-		s, src, rerr := config.ResolveSecret(config.EnvResolver{}, config.ResolveInput{
-			LiteralSecret:   f.secret,
-			SecretEnvFlag:   f.secretEnv,
-			TargetSecretEnv: tgt.SecretEnv,
-			ManifestSource:  manifest.Signing.SecretSource,
-		})
-		if rerr != nil {
-			return fmt.Errorf("%w: %v", sign.ErrMissingSecret, rerr)
-		}
-		secret = s
-		slog.Debug("resolved signing secret", "source", src)
+	secret, err := resolveSecret(f, tgt, manifest)
+	if err != nil {
+		return err
 	}
 	headers, err := parseHeaders(f.headers)
 	if err != nil {
