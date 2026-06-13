@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/knakul853/hookfire/internal/provider"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,4 +57,18 @@ func writeBadProvider(dir string) error {
 	}
 	manifest := []byte("name: bad\nsigning:\n  scheme: magic\n")
 	return os.WriteFile(filepath.Join(provDir, "manifest.yaml"), manifest, 0o644)
+}
+
+func TestVerifyProviderHMACAndNone(t *testing.T) {
+	gh, err := provider.ParseManifest([]byte(githubManifestYAML))
+	require.NoError(t, err)
+	sig, err := verifyProvider(gh)
+	require.NoError(t, err)
+	require.NotEmpty(t, sig)
+
+	none, err := provider.ParseManifest([]byte("name: n\nsigning: { scheme: none }\n"))
+	require.NoError(t, err)
+	sig, err = verifyProvider(none)
+	require.NoError(t, err)
+	require.Equal(t, "", sig)
 }

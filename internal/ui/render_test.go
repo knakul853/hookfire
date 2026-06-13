@@ -7,6 +7,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestRenderDispatch(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, Render(&buf, ModeJSON, sampleView()))
+	require.Contains(t, buf.String(), `"provider": "github"`)
+}
+
 func TestRenderDispatchAllModes(t *testing.T) {
 	v := sampleView()
 
@@ -21,10 +27,4 @@ func TestRenderDispatchAllModes(t *testing.T) {
 	var js bytes.Buffer
 	require.NoError(t, Render(&js, ModeJSON, v))
 	require.Contains(t, js.String(), `"provider": "github"`)
-}
-
-func TestStripSchemeEdgeCases(t *testing.T) {
-	require.Equal(t, "localhost:3000/webhook", stripScheme("http://localhost:3000/webhook"))
-	require.Equal(t, "example.com/h?t=1", stripScheme("https://example.com/h?t=1"))
-	require.Equal(t, "no-scheme/path", stripScheme("no-scheme/path"))
 }

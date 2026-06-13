@@ -69,3 +69,8 @@ func TestValidateAcceptsNoneWithoutHeader(t *testing.T) {
 	m, _ := ParseManifest([]byte("name: x\nsigning:\n  scheme: none\n"))
 	require.NoError(t, m.Validate())
 }
+
+func TestParseManifestRejectsBadYAML(t *testing.T) {
+	_, err := ParseManifest([]byte("name: [unterminated\n  : :"))
+	require.Error(t, err)
+}

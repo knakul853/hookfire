@@ -34,3 +34,8 @@ func TestEnvResolverMissing(t *testing.T) {
 	_, err := r.Resolve("env:HF_DEFINITELY_UNSET")
 	require.Error(t, err)
 }
+
+func TestEnvResolverRejectsNonEnvSource(t *testing.T) {
+	_, err := EnvResolver{}.Resolve("vault:secret/foo")
+	require.Error(t, err)
+}

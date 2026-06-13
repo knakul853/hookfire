@@ -1,6 +1,7 @@
 package sign
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -125,4 +126,16 @@ func TestNewRejectsBadAlgorithm(t *testing.T) {
 func TestNewRejectsMissingHeader(t *testing.T) {
 	_, err := New(SigningConfig{Scheme: "hmac", Algorithm: "sha256", Encoding: "hex"})
 	require.ErrorIs(t, err, ErrInvalidConfig)
+}
+
+func TestSecretNeverInHeader(t *testing.T) {
+	s, err := New(githubConfig())
+	require.NoError(t, err)
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	for _, vals := range h {
+		for _, v := range vals {
+			require.False(t, strings.Contains(v, goldSecret), "secret leaked into header")
+		}
+	}
 }
