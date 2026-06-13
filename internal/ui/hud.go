@@ -13,27 +13,6 @@ const (
 	snippetMax = 80
 )
 
-// ew wraps an io.Writer and accumulates the first write error, silencing
-// subsequent writes. This avoids unchecked-error lint noise on every Fprintf.
-type ew struct {
-	w   io.Writer
-	err error
-}
-
-func (e *ew) printf(format string, args ...any) {
-	if e.err != nil {
-		return
-	}
-	_, e.err = fmt.Fprintf(e.w, format, args...)
-}
-
-func (e *ew) println(s string) {
-	if e.err != nil {
-		return
-	}
-	_, e.err = fmt.Fprintln(e.w, s)
-}
-
 func formatBytes(n int) string {
 	if n >= 1024 {
 		return fmt.Sprintf("%.1fkb", float64(n)/1024)
@@ -43,17 +22,24 @@ func formatBytes(n int) string {
 
 func stripScheme(rawURL string) string {
 	u, err := url.Parse(rawURL)
-	if err != nil {
+	if err != nil || u.Host == "" {
 		return rawURL
 	}
-	return u.Host + u.Path
+	out := u.Host + u.Path
+	if u.RawQuery != "" {
+		out += "?" + u.RawQuery
+	}
+	return out
 }
 
+// truncate shortens s to at most limit runes (not bytes), so a multi-byte rune
+// is never split into invalid UTF-8.
 func truncate(s string, limit int) string {
-	if len(s) <= limit {
+	r := []rune(s)
+	if len(r) <= limit {
 		return s
 	}
-	return s[:limit-1] + "…"
+	return string(r[:limit-1]) + "…"
 }
 
 // RenderHUD writes the colored pipeline view. Deterministic for a given View.

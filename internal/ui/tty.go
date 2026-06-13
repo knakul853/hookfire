@@ -9,7 +9,8 @@ import (
 // Mode is the selected output rendering.
 type Mode int
 
-// Output rendering modes, in priority order (JSON > HUD > Plain).
+// Output rendering modes. SelectMode chooses among them; the iota values are
+// arbitrary tags, not a precedence ranking.
 const (
 	ModeHUD   Mode = iota // colored pipeline, TTY only
 	ModePlain             // aligned text, no ANSI
