@@ -1,15 +1,15 @@
+version: "2"
 run:
   timeout: 3m
 linters:
+  # errcheck, govet, ineffassign, staticcheck, and unused are enabled by default in v2.
   enable:
-    - errcheck
-    - govet
-    - staticcheck
     - revive
     - misspell
     - unconvert
     - bodyclose
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters: [errcheck]
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
