@@ -94,3 +94,34 @@ func TestHMACVercelGolden(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "8a09b3e005517381b23824cee6012c0771cbf01b", h.Get("x-vercel-signature"))
 }
+
+func TestHMACBase64Encoding(t *testing.T) {
+	cfg := SigningConfig{
+		Scheme: "hmac", Algorithm: "sha256", Encoding: "base64",
+		Basestring: "{{body}}", Output: "{{sig}}", Header: "X-Sig",
+	}
+	s, err := New(cfg)
+	require.NoError(t, err)
+	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	require.Equal(t, "ooRSC9bafvRbmGgC4HDThXbQqbmc81EPys4955Z22pE=", h.Get("X-Sig"))
+}
+
+func TestHMACDoesNotMutateBody(t *testing.T) {
+	body := []byte(`{"hello":"world"}`)
+	cp := append([]byte(nil), body...)
+	s, _ := New(githubConfig())
+	_, err := s.Sign(body, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	require.Equal(t, cp, body)
+}
+
+func TestNewRejectsBadAlgorithm(t *testing.T) {
+	_, err := New(SigningConfig{Scheme: "hmac", Algorithm: "md5", Encoding: "hex", Header: "X"})
+	require.ErrorIs(t, err, ErrUnsupportedScheme)
+}
+
+func TestNewRejectsMissingHeader(t *testing.T) {
+	_, err := New(SigningConfig{Scheme: "hmac", Algorithm: "sha256", Encoding: "hex"})
+	require.Error(t, err)
+}
