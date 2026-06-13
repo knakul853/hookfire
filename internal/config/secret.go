@@ -16,6 +16,10 @@ func (Secret) String() string { return "***" }
 // MarshalJSON returns the redaction placeholder so secrets never serialize.
 func (Secret) MarshalJSON() ([]byte, error) { return []byte(`"***"`), nil }
 
+// GoString implements fmt.GoStringer so %#v (and spew-style dumps) cannot print
+// the raw value, closing the one format verb String() does not cover.
+func (Secret) GoString() string { return `config.Secret("***")` }
+
 // Reveal returns the underlying value. Call only when signing.
 func (s Secret) Reveal() string { return string(s) }
 
