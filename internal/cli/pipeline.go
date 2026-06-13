@@ -36,94 +36,93 @@ type pipelineInput struct {
 	Fail         bool
 }
 
-// runPipeline resolves the event, renders the body, signs it (unless NoSign or
-// scheme==none), and (unless DryRun) fires it. The view is populated even on a
-// transport error or --fail non-2xx so the caller can still render it.
-func runPipeline(deps pipelineDeps, in pipelineInput) (ui.View, error) {
-	now := deps.Now
+// fireParams is the resolved input to the shared sign→fire→view path.
+type fireParams struct {
+	manifest     provider.Manifest
+	provider     string
+	event        string
+	url          string
+	body         []byte
+	secret       config.Secret
+	timestamp    int64
+	now          func() int64
+	baseHeaders  map[string]string
+	extraHeaders map[string]string
+	overrides    int
+	noSign       bool
+	dryRun       bool
+	fail         bool
+}
+
+// fireResult signs body (unless noSign or scheme==none), assembles the ui.View,
+// and (unless dryRun) builds and sends the request via deps.Sender. The view is
+// populated even on transport error / --fail non-2xx so callers can render it.
+func fireResult(deps pipelineDeps, p fireParams) (ui.View, error) {
+	now := p.now
 	if now == nil {
 		now = realNow
 	}
-	genUUID := deps.UUID
-	if genUUID == nil {
-		genUUID = newUUID
-	}
-
-	manifest, event, err := deps.Catalog.Lookup(in.Provider, in.Event)
-	if err != nil {
-		return ui.View{}, err
-	}
-
-	ts := in.Timestamp
+	ts := p.timestamp
 	if ts == 0 {
 		ts = now()
 	}
-	vars := render.Vars{
-		Timestamp: ts,
-		UUID:      genUUID(),
-		Event:     in.Event,
-		Now:       time.Unix(ts, 0).UTC().Format(time.RFC3339),
-	}
-	body, err := render.Render(event.Template, vars, in.Sets)
-	if err != nil {
-		return ui.View{}, err
-	}
 
-	method := manifest.Transport.Method
+	method := p.manifest.Transport.Method
 	if method == "" {
 		method = http.MethodPost
 	}
-	headers := event.Headers()
-	for k, v := range in.ExtraHeaders {
+	headers := make(map[string]string, len(p.baseHeaders)+len(p.extraHeaders))
+	for k, v := range p.baseHeaders {
+		headers[k] = v
+	}
+	for k, v := range p.extraHeaders {
 		headers[k] = v
 	}
 
-	signed := !in.NoSign && manifest.Signing.Scheme != "none"
+	signed := !p.noSign && p.manifest.Signing.Scheme != "none"
 	sigHeaders := http.Header{}
 	var sigView ui.SignatureView
 	if signed {
-		signer, serr := sign.New(manifest.SigningConfig())
-		if serr != nil {
-			return ui.View{}, serr
+		signer, err := sign.New(p.manifest.SigningConfig())
+		if err != nil {
+			return ui.View{}, err
 		}
-		if in.Secret.Reveal() == "" {
+		if p.secret.Reveal() == "" {
 			return ui.View{}, sign.ErrMissingSecret
 		}
-		sigHeaders, serr = signer.Sign(body, sign.Options{Secret: in.Secret.Reveal(), Timestamp: ts})
+		var serr error
+		sigHeaders, serr = signer.Sign(p.body, sign.Options{Secret: p.secret.Reveal(), Timestamp: ts})
 		if serr != nil {
 			return ui.View{}, serr
 		}
 		sigView = ui.SignatureView{
-			Header: manifest.Signing.Header,
-			Scheme: manifest.Signing.Scheme + "-" + manifest.Signing.Algorithm,
+			Header: p.manifest.Signing.Header,
+			Scheme: p.manifest.Signing.Scheme + "-" + p.manifest.Signing.Algorithm,
 		}
 	}
 
 	view := ui.View{
-		Provider:  in.Provider,
-		Event:     in.Event,
+		Provider:  p.provider,
+		Event:     p.event,
 		Signed:    signed,
-		NoSign:    in.NoSign,
-		DryRun:    in.DryRun,
+		NoSign:    p.noSign,
+		DryRun:    p.dryRun,
 		Signature: sigView,
 		Request: ui.RequestView{
 			Method:  method,
-			URL:     in.URL,
+			URL:     p.url,
 			Headers: displayHeaders(headers, sigHeaders),
-			Bytes:   len(body),
+			Bytes:   len(p.body),
 		},
-		Overrides: len(in.Sets),
+		Overrides: p.overrides,
 	}
-	if in.DryRun {
+	if p.dryRun {
 		return view, nil
 	}
 
 	req, err := fire.BuildRequest(fire.RequestSpec{
-		Method:           method,
-		URL:              in.URL,
-		Body:             body,
-		Headers:          headers,
-		SignatureHeaders: sigHeaders,
+		Method: method, URL: p.url, Body: p.body,
+		Headers: headers, SignatureHeaders: sigHeaders,
 	})
 	if err != nil {
 		return view, err
@@ -134,15 +133,45 @@ func runPipeline(deps pipelineDeps, in pipelineInput) (ui.View, error) {
 		return view, &transportError{err}
 	}
 	view.Response = &ui.ResponseView{
-		Status:    res.Status,
-		LatencyMS: res.LatencyMS,
-		Bytes:     res.Bytes,
-		Body:      string(res.Body),
+		Status: res.Status, LatencyMS: res.LatencyMS, Bytes: res.Bytes, Body: string(res.Body),
 	}
-	if in.Fail && (res.Status < 200 || res.Status >= 300) {
+	if p.fail && (res.Status < 200 || res.Status >= 300) {
 		return view, &failResponseError{status: res.Status}
 	}
 	return view, nil
+}
+
+// runPipeline resolves the event, renders the body, and delegates to fireResult.
+func runPipeline(deps pipelineDeps, in pipelineInput) (ui.View, error) {
+	now := deps.Now
+	if now == nil {
+		now = realNow
+	}
+	genUUID := deps.UUID
+	if genUUID == nil {
+		genUUID = newUUID
+	}
+	manifest, event, err := deps.Catalog.Lookup(in.Provider, in.Event)
+	if err != nil {
+		return ui.View{}, err
+	}
+	ts := in.Timestamp
+	if ts == 0 {
+		ts = now()
+	}
+	body, err := render.Render(event.Template, render.Vars{
+		Timestamp: ts, UUID: genUUID(), Event: in.Event,
+		Now: time.Unix(ts, 0).UTC().Format(time.RFC3339),
+	}, in.Sets)
+	if err != nil {
+		return ui.View{}, err
+	}
+	return fireResult(deps, fireParams{
+		manifest: manifest, provider: in.Provider, event: in.Event, url: in.URL,
+		body: body, secret: in.Secret, timestamp: ts, now: now,
+		baseHeaders: event.Headers(), extraHeaders: in.ExtraHeaders,
+		overrides: len(in.Sets), noSign: in.NoSign, dryRun: in.DryRun, fail: in.Fail,
+	})
 }
 
 // displayHeaders merges request headers with signature header values for the UI.
