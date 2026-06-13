@@ -78,7 +78,7 @@ func (_c *MockCatalog_Events_Call) RunAndReturn(run func(string) ([]string, erro
 	return _c
 }
 
-// List provides a mock function with given fields:
+// List provides a mock function with no fields
 func (_m *MockCatalog) List() []string {
 	ret := _m.Called()
 
@@ -125,9 +125,9 @@ func (_c *MockCatalog_List_Call) RunAndReturn(run func() []string) *MockCatalog_
 	return _c
 }
 
-// Lookup provides a mock function with given fields: _a0, _a1
-func (_m *MockCatalog) Lookup(_a0 string, _a1 string) (provider.Manifest, provider.Event, error) {
-	ret := _m.Called(_a0, _a1)
+// Lookup provides a mock function with given fields: _a0, event
+func (_m *MockCatalog) Lookup(_a0 string, event string) (provider.Manifest, provider.Event, error) {
+	ret := _m.Called(_a0, event)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Lookup")
@@ -137,22 +137,22 @@ func (_m *MockCatalog) Lookup(_a0 string, _a1 string) (provider.Manifest, provid
 	var r1 provider.Event
 	var r2 error
 	if rf, ok := ret.Get(0).(func(string, string) (provider.Manifest, provider.Event, error)); ok {
-		return rf(_a0, _a1)
+		return rf(_a0, event)
 	}
 	if rf, ok := ret.Get(0).(func(string, string) provider.Manifest); ok {
-		r0 = rf(_a0, _a1)
+		r0 = rf(_a0, event)
 	} else {
 		r0 = ret.Get(0).(provider.Manifest)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string) provider.Event); ok {
-		r1 = rf(_a0, _a1)
+		r1 = rf(_a0, event)
 	} else {
 		r1 = ret.Get(1).(provider.Event)
 	}
 
 	if rf, ok := ret.Get(2).(func(string, string) error); ok {
-		r2 = rf(_a0, _a1)
+		r2 = rf(_a0, event)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -167,12 +167,12 @@ type MockCatalog_Lookup_Call struct {
 
 // Lookup is a helper method to define mock.On call
 //   - _a0 string
-//   - _a1 string
-func (_e *MockCatalog_Expecter) Lookup(_a0 interface{}, _a1 interface{}) *MockCatalog_Lookup_Call {
-	return &MockCatalog_Lookup_Call{Call: _e.mock.On("Lookup", _a0, _a1)}
+//   - event string
+func (_e *MockCatalog_Expecter) Lookup(_a0 interface{}, event interface{}) *MockCatalog_Lookup_Call {
+	return &MockCatalog_Lookup_Call{Call: _e.mock.On("Lookup", _a0, event)}
 }
 
-func (_c *MockCatalog_Lookup_Call) Run(run func(_a0 string, _a1 string)) *MockCatalog_Lookup_Call {
+func (_c *MockCatalog_Lookup_Call) Run(run func(_a0 string, event string)) *MockCatalog_Lookup_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string), args[1].(string))
 	})
