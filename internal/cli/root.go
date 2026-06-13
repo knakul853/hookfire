@@ -25,7 +25,7 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 	root.PersistentFlags().CountVarP(&verbosity, "verbose", "v", "Verbose diagnostics to stderr (-v info, -vv debug)")
-	root.AddCommand(newVersionCmd(), newTriggerCmd(), newShowCmd(), newListCmd(), newReplayCmd())
+	root.AddCommand(newVersionCmd(), newTriggerCmd(), newShowCmd(), newListCmd(), newReplayCmd(), newVerifyCmd())
 	return root
 }
 
