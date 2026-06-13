@@ -10,8 +10,27 @@ builds:
     goarch: [amd64, arm64]
 archives:
   - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         formats: [zip]
 checksum:
   name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^chore:", "^ci:"]
+
+# Homebrew tap. NOTE (SPEC §17 Q2): tap repo location is an owner decision —
+# this defaults to a personal tap at github.com/knakul853/homebrew-tap, which
+# must exist before the first release. Change owner/name for an org tap.
+brews:
+  - name: hookfire
+    repository:
+      owner: knakul853
+      name: homebrew-tap
+    homepage: "https://github.com/knakul853/hookfire"
+    description: "Fire correctly-signed synthetic webhook events at any URL"
+    license: "Apache-2.0"
+    test: |
+      system "#{bin}/hookfire version"
