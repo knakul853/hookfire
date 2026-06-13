@@ -30,7 +30,7 @@ func NewSender(o Options) Sender {
 	}
 	tr := &http.Transport{}
 	if o.Insecure {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec // opt-in via --insecure, user is warned
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	return &httpSender{client: &http.Client{Timeout: timeout, Transport: tr}}
 }
