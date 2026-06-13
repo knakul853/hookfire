@@ -1,0 +1,17 @@
+with-expecter: true
+dir: "mocks"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "mocks"
+packages:
+  github.com/knakul853/hookfire/internal/sign:
+    interfaces:
+      Signer:
+  github.com/knakul853/hookfire/internal/provider:
+    interfaces:
+      Catalog:
+  github.com/knakul853/hookfire/internal/config:
+    interfaces:
+      SecretResolver:
+  github.com/knakul853/hookfire/internal/fire:
+    interfaces:
+      Sender:
