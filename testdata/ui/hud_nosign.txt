@@ -1,0 +1,7 @@
+hookfire  github/pull_request.opened
+
+ render ▸ 1.2kb payload · 0 overrides
+ sign   ▸ skipped (--no-sign)
+ fire   ▸ POST localhost:3000/webhook
+ ────────────────────────────────────────────
+ ✓ 200 OK · 142ms · 18b   {"ok":true}

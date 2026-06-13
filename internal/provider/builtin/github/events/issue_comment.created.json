@@ -1,0 +1,7 @@
+{
+  "action": "created",
+  "issue": { "number": 1, "title": "Bug report", "state": "open" },
+  "comment": { "id": 1, "body": "Thanks!", "created_at": "{{now}}" },
+  "repository": { "full_name": "octocat/hello-world" },
+  "sender": { "login": "octocat" }
+}

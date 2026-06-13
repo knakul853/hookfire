@@ -1,0 +1,4 @@
+{
+  "id": "{{uuid}}", "type": "deployment.error", "createdAt": {{timestamp}},
+  "payload": { "deployment": { "id": "dpl_{{uuid}}", "name": "my-app" }, "target": null, "error": { "code": "BUILD_FAILED", "message": "Build failed" } }
+}

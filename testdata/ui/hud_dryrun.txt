@@ -1,0 +1,7 @@
+hookfire  github/pull_request.opened
+
+ render ▸ 1.2kb payload · 0 overrides
+ sign   ▸ hmac-sha256 → X-Hub-Signature-256
+ fire   ▸ dry-run (not sent)
+ ────────────────────────────────────────────
+ X-Hub-Signature-256: sha256=abc

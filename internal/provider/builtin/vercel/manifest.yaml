@@ -1,0 +1,14 @@
+name: vercel
+description: Vercel webhooks
+homepage: https://vercel.com/docs/observability/webhooks-overview
+transport:
+  method: POST
+  content_type: application/json
+signing:
+  scheme: hmac
+  algorithm: sha1
+  encoding: hex
+  secret_source: "env:VERCEL_WEBHOOK_SECRET"
+  basestring: "{{body}}"
+  output: "{{sig}}"
+  header: "x-vercel-signature"

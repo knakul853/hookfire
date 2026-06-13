@@ -1,0 +1,5 @@
+hookfire  github/pull_request.opened
+render:  1234 bytes · 0 overrides
+sign:    hmac-sha256 → X-Hub-Signature-256
+fire:    POST http://localhost:3000/webhook
+result:  200 · 142ms · 18b

@@ -1,0 +1,5 @@
+{
+  "token": "{{uuid}}", "type": "event_callback",
+  "event": { "type": "app_mention", "user": "U123", "text": "<@U0> hello", "ts": "{{timestamp}}.000100", "channel": "C123" },
+  "event_id": "{{uuid}}", "event_time": {{timestamp}}
+}

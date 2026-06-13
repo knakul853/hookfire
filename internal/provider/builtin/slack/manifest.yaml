@@ -1,0 +1,16 @@
+name: slack
+description: Slack Events API
+homepage: https://api.slack.com/authentication/verifying-requests-from-slack
+transport:
+  method: POST
+  content_type: application/json
+signing:
+  scheme: hmac
+  algorithm: sha256
+  encoding: hex
+  secret_source: "env:SLACK_SIGNING_SECRET"
+  basestring: "v0:{{timestamp}}:{{body}}"
+  output: "v0={{sig}}"
+  header: "X-Slack-Signature"
+  aux_headers:
+    X-Slack-Request-Timestamp: "{{timestamp}}"

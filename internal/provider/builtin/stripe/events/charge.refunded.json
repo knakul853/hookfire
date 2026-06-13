@@ -1,0 +1,4 @@
+{
+  "id": "evt_{{uuid}}", "object": "event", "type": "charge.refunded", "created": {{timestamp}},
+  "data": { "object": { "id": "ch_{{uuid}}", "object": "charge", "amount": 2000, "amount_refunded": 2000, "refunded": true, "currency": "usd" } }
+}
