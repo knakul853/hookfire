@@ -39,3 +39,33 @@ func TestParseManifest(t *testing.T) {
 	require.Equal(t, "env:GITHUB_WEBHOOK_SECRET", m.Signing.SecretSource)
 	require.Equal(t, "pull_request", m.Events["pull_request.opened"].Headers["X-GitHub-Event"])
 }
+
+func TestValidateRejectsUnknownScheme(t *testing.T) {
+	m, _ := ParseManifest([]byte("name: x\nsigning:\n  scheme: magic\n"))
+	require.Error(t, m.Validate())
+}
+
+func TestValidateRejectsMissingHeaderWhenSigning(t *testing.T) {
+	m, _ := ParseManifest([]byte("name: x\nsigning:\n  scheme: hmac\n  algorithm: sha256\n  encoding: hex\n"))
+	require.Error(t, m.Validate())
+}
+
+func TestValidateRejectsBadSecretSource(t *testing.T) {
+	m, _ := ParseManifest([]byte("name: x\nsigning:\n  scheme: hmac\n  algorithm: sha256\n  encoding: hex\n  header: X\n  secret_source: \"vault:foo\"\n"))
+	require.Error(t, m.Validate())
+}
+
+func TestValidateRejectsMissingName(t *testing.T) {
+	m, _ := ParseManifest([]byte("signing:\n  scheme: none\n"))
+	require.Error(t, m.Validate())
+}
+
+func TestValidateAcceptsGithub(t *testing.T) {
+	m, _ := ParseManifest([]byte(githubManifest))
+	require.NoError(t, m.Validate())
+}
+
+func TestValidateAcceptsNoneWithoutHeader(t *testing.T) {
+	m, _ := ParseManifest([]byte("name: x\nsigning:\n  scheme: none\n"))
+	require.NoError(t, m.Validate())
+}
