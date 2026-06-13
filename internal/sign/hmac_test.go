@@ -67,3 +67,18 @@ func TestHMACSlackGolden(t *testing.T) {
 		h.Get("X-Slack-Signature"))
 	require.Equal(t, "1700000000", h.Get("X-Slack-Request-Timestamp"))
 }
+
+func TestHMACStripeGolden(t *testing.T) {
+	cfg := SigningConfig{
+		Scheme: "hmac", Algorithm: "sha256", Encoding: "hex",
+		Basestring: "{{timestamp}}.{{body}}", Output: "t={{timestamp}},v1={{sig}}",
+		Header: "Stripe-Signature",
+	}
+	s, err := New(cfg)
+	require.NoError(t, err)
+	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	require.Equal(t,
+		"t=1700000000,v1=2515c9ce1475bfae7728499a106d498a017d4d494a0f651800f25d06603e15ba",
+		h.Get("Stripe-Signature"))
+}
