@@ -28,3 +28,10 @@ func TestProviderDirPathsSkipsMissing(t *testing.T) {
 	paths := providerDirPaths("/nonexistent", "/nonexistent", "")
 	require.Empty(t, paths)
 }
+
+func TestBuildCatalogLoadsBuiltins(t *testing.T) {
+	cat, err := buildCatalog("", nil)
+	require.NoError(t, err)
+	names := cat.List()
+	require.NotEmpty(t, names)
+}
