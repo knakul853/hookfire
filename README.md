@@ -1,5 +1,10 @@
 # hookfire
 
+[![ci](https://github.com/knakul853/hookfire/actions/workflows/ci.yml/badge.svg)](https://github.com/knakul853/hookfire/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/knakul853/hookfire.svg)](https://pkg.go.dev/github.com/knakul853/hookfire)
+[![Go Report Card](https://goreportcard.com/badge/github.com/knakul853/hookfire)](https://goreportcard.com/report/github.com/knakul853/hookfire)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 A single static Go binary that fires **correctly-shaped, correctly-signed** synthetic webhook events at any URL. Think `stripe trigger`, but provider-agnostic — and providers are **data, not code**.
 
 ```sh
@@ -11,15 +16,14 @@ Testing an inbound webhook handler locally is annoying out of proportion to its 
 ## Install
 
 ```sh
-# Homebrew (once the tap is published)
-brew install knakul853/tap/hookfire
-
-# install script (Linux/macOS)
-curl -fsSL https://raw.githubusercontent.com/knakul853/hookfire/main/install.sh | sh
-
-# from source
+# from source (requires Go 1.24+)
 go install github.com/knakul853/hookfire/cmd/hookfire@latest
+
+# install script — downloads the latest release binary (Linux/macOS)
+curl -fsSL https://raw.githubusercontent.com/knakul853/hookfire/main/install.sh | sh
 ```
+
+Or grab a prebuilt binary for your platform from the [Releases](https://github.com/knakul853/hookfire/releases) page. A Homebrew tap is planned.
 
 ## Quickstart
 

@@ -5,6 +5,11 @@
 *.test
 *.out
 
+# Test / coverage artifacts
+coverage.txt
+coverage.html
+profile.cov
+
 # Go
 /vendor/
 go.work
