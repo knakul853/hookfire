@@ -70,6 +70,9 @@ func (m Manifest) Validate() error {
 	if m.Name == "" {
 		return fmt.Errorf("provider: manifest missing name")
 	}
+	// An absent secret_source is allowed: the secret may instead come from
+	// --secret, --secret-env, or a target alias at fire time (SPEC §8). When
+	// present, it must be a parseable env:NAME reference.
 	if m.Signing.SecretSource != "" {
 		if _, err := parseSecretSource(m.Signing.SecretSource); err != nil {
 			return fmt.Errorf("provider %q: %w", m.Name, err)

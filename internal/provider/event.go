@@ -8,9 +8,6 @@ type Event struct {
 	manifest *Manifest
 }
 
-// Manifest returns the owning manifest.
-func (e Event) Manifest() *Manifest { return e.manifest }
-
 // Headers returns the transport headers plus per-event overrides plus
 // Content-Type. Per-event headers win over transport headers.
 func (e Event) Headers() map[string]string {
