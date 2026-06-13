@@ -119,11 +119,11 @@ func runPipeline(deps pipelineDeps, in pipelineInput) (ui.View, error) {
 	}
 
 	req, err := fire.BuildRequest(fire.RequestSpec{
-		Method:          method,
-		URL:             in.URL,
-		Body:            body,
-		Headers:         headers,
-		SignatureHeaders: headerToMap(sigHeaders),
+		Method:           method,
+		URL:              in.URL,
+		Body:             body,
+		Headers:          headers,
+		SignatureHeaders: sigHeaders,
 	})
 	if err != nil {
 		return view, err
@@ -155,15 +155,6 @@ func displayHeaders(headers map[string]string, sig http.Header) map[string]strin
 		if len(vals) > 0 {
 			out[k] = vals[0]
 		}
-	}
-	return out
-}
-
-// headerToMap converts http.Header to the map[string][]string expected by fire.RequestSpec.
-func headerToMap(h http.Header) map[string][]string {
-	out := make(map[string][]string, len(h))
-	for k, v := range h {
-		out[k] = v
 	}
 	return out
 }
