@@ -29,3 +29,13 @@ func TestListEvents(t *testing.T) {
 	require.NoError(t, json.Unmarshal(out.Bytes(), &got))
 	require.Contains(t, got, "push")
 }
+
+func TestPrintListWritesToGivenWriter(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, printList(&buf, []string{"a", "b"}, false))
+	require.Equal(t, "a\nb\n", buf.String())
+
+	buf.Reset()
+	require.NoError(t, printList(&buf, []string{"a", "b"}, true))
+	require.JSONEq(t, `["a","b"]`, buf.String())
+}

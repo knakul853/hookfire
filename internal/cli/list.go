@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/spf13/cobra"
 )
@@ -20,13 +21,13 @@ func newListCmd() *cobra.Command {
 				return err
 			}
 			if len(args) == 0 {
-				return printList(cmd, cat.List(), jsonOut)
+				return printList(cmd.OutOrStdout(), cat.List(), jsonOut)
 			}
 			evs, err := cat.Events(args[0])
 			if err != nil {
 				return suggestErr(cat, args[0], "", err)
 			}
-			return printList(cmd, evs, jsonOut)
+			return printList(cmd.OutOrStdout(), evs, jsonOut)
 		},
 	}
 	cmd.Flags().StringVar(&providersDir, "providers-dir", "", "Extra providers directory (highest precedence)")
@@ -34,17 +35,21 @@ func newListCmd() *cobra.Command {
 	return cmd
 }
 
-func printList(cmd *cobra.Command, items []string, jsonOut bool) error {
+// printList writes items to w. It writes to the explicit stdout writer (not
+// cobra's Print family, which targets stderr) so command output stays on stdout.
+func printList(w io.Writer, items []string, jsonOut bool) error {
 	if jsonOut {
 		b, err := json.Marshal(items)
 		if err != nil {
 			return fmt.Errorf("cli: marshal list: %w", err)
 		}
-		cmd.Println(string(b))
-		return nil
+		_, err = fmt.Fprintln(w, string(b))
+		return err
 	}
 	for _, it := range items {
-		cmd.Println(it)
+		if _, err := fmt.Fprintln(w, it); err != nil {
+			return err
+		}
 	}
 	return nil
 }
