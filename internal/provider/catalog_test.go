@@ -39,7 +39,7 @@ func TestCatalogFilesystemOverridesEmbeddedWithWarn(t *testing.T) {
 	c, err := NewCatalog(Sources{
 		Embedded: testFS(),
 		Dirs:     []fs.FS{fsOverride},
-		OnShadow: func(name, src string) { warned = append(warned, name) },
+		OnShadow: func(name, _ string) { warned = append(warned, name) },
 	})
 	require.NoError(t, err)
 	_, ev, _ := c.Lookup("github", "push")
