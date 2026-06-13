@@ -1,0 +1,19 @@
+# Binaries
+/hookfire
+/dist/
+*.exe
+*.test
+*.out
+
+# Go
+/vendor/
+go.work
+go.work.sum
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local Claude worktrees
+.claude/worktrees/
