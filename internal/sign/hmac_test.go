@@ -50,3 +50,20 @@ func TestHMACMissingSecret(t *testing.T) {
 	_, err = s.Sign(goldBody, SignOptions{Timestamp: goldTS})
 	require.ErrorIs(t, err, ErrMissingSecret)
 }
+
+func TestHMACSlackGolden(t *testing.T) {
+	cfg := SigningConfig{
+		Scheme: "hmac", Algorithm: "sha256", Encoding: "hex",
+		Basestring: "v0:{{timestamp}}:{{body}}", Output: "v0={{sig}}",
+		Header:     "X-Slack-Signature",
+		AuxHeaders: map[string]string{"X-Slack-Request-Timestamp": "{{timestamp}}"},
+	}
+	s, err := New(cfg)
+	require.NoError(t, err)
+	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	require.Equal(t,
+		"v0=473d71e21d4553ad4d6a2967b67acc609bad37b32502c07f06a00cfb310fd907",
+		h.Get("X-Slack-Signature"))
+	require.Equal(t, "1700000000", h.Get("X-Slack-Request-Timestamp"))
+}
