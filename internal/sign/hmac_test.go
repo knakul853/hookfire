@@ -82,3 +82,15 @@ func TestHMACStripeGolden(t *testing.T) {
 		"t=1700000000,v1=2515c9ce1475bfae7728499a106d498a017d4d494a0f651800f25d06603e15ba",
 		h.Get("Stripe-Signature"))
 }
+
+func TestHMACVercelGolden(t *testing.T) {
+	cfg := SigningConfig{
+		Scheme: "hmac", Algorithm: "sha1", Encoding: "hex",
+		Basestring: "{{body}}", Output: "{{sig}}", Header: "x-vercel-signature",
+	}
+	s, err := New(cfg)
+	require.NoError(t, err)
+	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	require.NoError(t, err)
+	require.Equal(t, "8a09b3e005517381b23824cee6012c0771cbf01b", h.Get("x-vercel-signature"))
+}
