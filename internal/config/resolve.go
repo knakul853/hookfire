@@ -5,6 +5,7 @@ import "fmt"
 // SecretSource records which input supplied the secret (for debug logging).
 type SecretSource string
 
+// SecretSource constants identify which input tier supplied the secret.
 const (
 	SourceLiteral       SecretSource = "--secret"
 	SourceSecretEnvFlag SecretSource = "--secret-env"
