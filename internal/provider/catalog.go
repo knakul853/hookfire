@@ -19,6 +19,9 @@ type Catalog interface {
 	Lookup(provider, event string) (Manifest, Event, error)
 	List() []string
 	Events(provider string) ([]string, error)
+	// Manifest returns the provider manifest without requiring an event name.
+	// Used by replay, which works from a raw payload rather than a named event.
+	Manifest(provider string) (Manifest, error)
 }
 
 // Sources describes where providers come from, in increasing precedence:
@@ -96,6 +99,14 @@ func (c *catalog) List() []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+func (c *catalog) Manifest(name string) (Manifest, error) {
+	p, ok := c.providers[name]
+	if !ok {
+		return Manifest{}, fmt.Errorf("%w: %q", ErrUnknownProvider, name)
+	}
+	return p.Manifest, nil
 }
 
 func (c *catalog) Events(provider string) ([]string, error) {

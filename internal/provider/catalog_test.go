@@ -30,6 +30,15 @@ func TestCatalogUnknownEvent(t *testing.T) {
 	require.ErrorIs(t, err, ErrUnknownEvent)
 }
 
+func TestCatalogManifest(t *testing.T) {
+	c, _ := NewCatalog(Sources{Embedded: testFS()})
+	m, err := c.Manifest("github")
+	require.NoError(t, err)
+	require.Equal(t, "github", m.Name)
+	_, err = c.Manifest("nope")
+	require.ErrorIs(t, err, ErrUnknownProvider)
+}
+
 func TestCatalogFilesystemOverridesEmbeddedWithWarn(t *testing.T) {
 	fsOverride := fstest.MapFS{
 		"github/manifest.yaml":    {Data: []byte(githubManifest)},

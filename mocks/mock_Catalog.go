@@ -189,6 +189,62 @@ func (_c *MockCatalog_Lookup_Call) RunAndReturn(run func(string, string) (provid
 	return _c
 }
 
+// Manifest provides a mock function with given fields: _a0
+func (_m *MockCatalog) Manifest(_a0 string) (provider.Manifest, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Manifest")
+	}
+
+	var r0 provider.Manifest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (provider.Manifest, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(string) provider.Manifest); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Get(0).(provider.Manifest)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockCatalog_Manifest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Manifest'
+type MockCatalog_Manifest_Call struct {
+	*mock.Call
+}
+
+// Manifest is a helper method to define mock.On call
+//   - _a0 string
+func (_e *MockCatalog_Expecter) Manifest(_a0 interface{}) *MockCatalog_Manifest_Call {
+	return &MockCatalog_Manifest_Call{Call: _e.mock.On("Manifest", _a0)}
+}
+
+func (_c *MockCatalog_Manifest_Call) Run(run func(_a0 string)) *MockCatalog_Manifest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockCatalog_Manifest_Call) Return(_a0 provider.Manifest, _a1 error) *MockCatalog_Manifest_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockCatalog_Manifest_Call) RunAndReturn(run func(string) (provider.Manifest, error)) *MockCatalog_Manifest_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockCatalog creates a new instance of MockCatalog. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockCatalog(t interface {
