@@ -7,7 +7,9 @@ import (
 )
 
 // RequestSpec is everything needed to build the outbound request. SignatureHeaders
-// are applied last so they cannot be clobbered by transport/--header values.
+// are applied last so they cannot be clobbered by transport/--header values; each
+// signature header replaces any same-named user header while keeping all of its
+// own values (hence []string).
 type RequestSpec struct {
 	Method           string
 	URL              string
@@ -32,9 +34,9 @@ func BuildRequest(spec RequestSpec) (*http.Request, error) {
 		req.Header.Set(k, v)
 	}
 	for k, vals := range spec.SignatureHeaders {
-		for _, v := range vals {
-			req.Header.Set(k, v)
-		}
+		// Assign the whole slice so a multi-value signature header keeps every
+		// value, and so the signature replaces any same-named user header.
+		req.Header[http.CanonicalHeaderKey(k)] = vals
 	}
 	return req, nil
 }

@@ -24,3 +24,15 @@ func TestBuildRequest(t *testing.T) {
 	require.Equal(t, `{"a":1}`, string(body))
 	require.Equal(t, int64(7), req.ContentLength)
 }
+
+func TestBuildRequestSignatureHeadersMultiValueAndReplace(t *testing.T) {
+	req, err := BuildRequest(RequestSpec{
+		URL:  "http://localhost/webhook",
+		Body: []byte(`{}`),
+		// A user header that the signature must override, not merely append to.
+		Headers:          map[string]string{"X-Sig": "user-set"},
+		SignatureHeaders: map[string][]string{"X-Sig": {"a", "b"}},
+	})
+	require.NoError(t, err)
+	require.Equal(t, []string{"a", "b"}, req.Header.Values("X-Sig"))
+}
