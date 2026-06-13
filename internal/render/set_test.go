@@ -45,3 +45,13 @@ func TestSetIntegerStaysInteger(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, `{"amount":2000}`, string(out))
 }
+
+// Values that strconv.ParseFloat accepts but JSON rejects (leading zeros, Inf,
+// NaN) must become strings rather than a body that fails to marshal.
+func TestSetNonJSONNumberBecomesString(t *testing.T) {
+	for _, raw := range []string{"007", "Inf", "NaN"} {
+		out, err := Render([]byte(`{"v":0}`), Vars{}, []Set{{Path: "v", Value: raw}})
+		require.NoError(t, err, "value %q", raw)
+		require.JSONEq(t, `{"v":"`+raw+`"}`, string(out), "value %q", raw)
+	}
+}

@@ -69,7 +69,10 @@ func setPath(node any, segs []string, val any) (any, error) {
 
 // inferValue maps a raw --set string to a JSON value: true/false→bool, null→nil,
 // numeric→json.Number (preserving integer form), {…}/[…]→parsed JSON, else
-// string. ForceString always yields a string.
+// string. ForceString always yields a string. The numeric branch is gated on
+// JSON's own number grammar (not strconv.ParseFloat) so inputs like "007", "Inf"
+// or "NaN" — which ParseFloat accepts but JSON rejects — fall through to string
+// instead of producing a body that fails to marshal later.
 func inferValue(raw string, forceString bool) any {
 	if forceString {
 		return raw
@@ -82,8 +85,9 @@ func inferValue(raw string, forceString bool) any {
 	case "null":
 		return nil
 	}
-	if _, err := strconv.ParseFloat(raw, 64); err == nil {
-		return json.Number(raw)
+	var n json.Number
+	if json.Unmarshal([]byte(raw), &n) == nil {
+		return n
 	}
 	if len(raw) > 0 && (raw[0] == '{' || raw[0] == '[') {
 		var parsed any
