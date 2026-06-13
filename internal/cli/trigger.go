@@ -37,7 +37,8 @@ func newShowCmd() *cobra.Command {
 // runTrigger resolves config/secret, runs the pipeline, renders the view, and
 // returns the pipeline error (mapped to an exit code by Run). show forces dryRun.
 func runTrigger(cmd *cobra.Command, f *commonFlags, providerName, event string, forceDryRun bool) error {
-	cat, tgt, url, err := resolveTarget(f)
+	dryRun := f.dryRun || forceDryRun
+	cat, tgt, url, err := resolveTarget(f, !dryRun)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func runTrigger(cmd *cobra.Command, f *commonFlags, providerName, event string, 
 		Sets:         sets,
 		ExtraHeaders: headers,
 		NoSign:       f.noSign,
-		DryRun:       f.dryRun || forceDryRun,
+		DryRun:       dryRun,
 		Fail:         f.fail,
 	})
 

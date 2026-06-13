@@ -32,7 +32,7 @@ func newReplayCmd() *cobra.Command {
 // runReplay reads a saved payload verbatim (no rendering, no --set), signs it
 // with the named provider's scheme, and fires it. The body is sent byte-for-byte.
 func runReplay(cmd *cobra.Command, f *commonFlags, providerName, file string) error {
-	cat, tgt, url, err := resolveTarget(f)
+	cat, tgt, url, err := resolveTarget(f, !f.dryRun)
 	if err != nil {
 		return err
 	}

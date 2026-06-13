@@ -11,8 +11,9 @@ import (
 
 // resolveTarget builds the catalog and resolves the config target alias and URL,
 // applying the shared risky-flag warnings. It is used by trigger, show, and
-// replay so they share one resolution path.
-func resolveTarget(f *commonFlags) (provider.Catalog, config.Target, string, error) {
+// replay so they share one resolution path. requireURL is false for dry-run,
+// where no request is sent and a URL is therefore optional.
+func resolveTarget(f *commonFlags, requireURL bool) (provider.Catalog, config.Target, string, error) {
 	cat, err := buildCatalog(f.providersDir, func(name, src string) {
 		slog.Warn("filesystem provider shadows a built-in", "provider", name, "source", src)
 	})
@@ -34,7 +35,7 @@ func resolveTarget(f *commonFlags) (provider.Catalog, config.Target, string, err
 	if url == "" {
 		url = tgt.URL
 	}
-	if url == "" {
+	if url == "" && requireURL {
 		return nil, config.Target{}, "", fmt.Errorf("%w: no target URL (pass --url or -t <alias> with a configured url)", errUsage)
 	}
 

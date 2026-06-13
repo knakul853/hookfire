@@ -45,3 +45,9 @@ func TestShowNeverFires(t *testing.T) {
 	// show is dry-run so it must succeed without touching the network.
 	require.Equal(t, 0, Run([]string{"show", "github", "push", "--url", "http://127.0.0.1:1/x", "--secret", "s", "--json"}))
 }
+
+func TestDryRunNeedsNoURL(t *testing.T) {
+	// show / --dry-run never hit the network, so a target URL is not required.
+	require.Equal(t, 0, Run([]string{"show", "github", "push", "--secret", "s", "--json"}))
+	require.Equal(t, 0, Run([]string{"trigger", "github", "push", "--dry-run", "--secret", "s", "--json"}))
+}
