@@ -24,7 +24,7 @@ func githubConfig() SigningConfig {
 func TestHMACGithubGolden(t *testing.T) {
 	s, err := New(githubConfig())
 	require.NoError(t, err)
-	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t,
 		"sha256=a284520bd6da7ef45b986802e070d38576d0a9b99cf3510fcace3de79676da91",
@@ -37,7 +37,7 @@ func TestHMACGithubPublishedCanonical(t *testing.T) {
 	s, err := New(githubConfig())
 	require.NoError(t, err)
 	h, err := s.Sign([]byte("Hello, World!"),
-		SignOptions{Secret: "It's a Secret to Everybody", Timestamp: goldTS})
+		Options{Secret: "It's a Secret to Everybody", Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t,
 		"sha256=757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17",
@@ -47,7 +47,7 @@ func TestHMACGithubPublishedCanonical(t *testing.T) {
 func TestHMACMissingSecret(t *testing.T) {
 	s, err := New(githubConfig())
 	require.NoError(t, err)
-	_, err = s.Sign(goldBody, SignOptions{Timestamp: goldTS})
+	_, err = s.Sign(goldBody, Options{Timestamp: goldTS})
 	require.ErrorIs(t, err, ErrMissingSecret)
 }
 
@@ -60,7 +60,7 @@ func TestHMACSlackGolden(t *testing.T) {
 	}
 	s, err := New(cfg)
 	require.NoError(t, err)
-	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t,
 		"v0=473d71e21d4553ad4d6a2967b67acc609bad37b32502c07f06a00cfb310fd907",
@@ -76,7 +76,7 @@ func TestHMACStripeGolden(t *testing.T) {
 	}
 	s, err := New(cfg)
 	require.NoError(t, err)
-	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t,
 		"t=1700000000,v1=2515c9ce1475bfae7728499a106d498a017d4d494a0f651800f25d06603e15ba",
@@ -90,7 +90,7 @@ func TestHMACVercelGolden(t *testing.T) {
 	}
 	s, err := New(cfg)
 	require.NoError(t, err)
-	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t, "8a09b3e005517381b23824cee6012c0771cbf01b", h.Get("x-vercel-signature"))
 }
@@ -102,7 +102,7 @@ func TestHMACBase64Encoding(t *testing.T) {
 	}
 	s, err := New(cfg)
 	require.NoError(t, err)
-	h, err := s.Sign(goldBody, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	h, err := s.Sign(goldBody, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t, "ooRSC9bafvRbmGgC4HDThXbQqbmc81EPys4955Z22pE=", h.Get("X-Sig"))
 }
@@ -110,8 +110,9 @@ func TestHMACBase64Encoding(t *testing.T) {
 func TestHMACDoesNotMutateBody(t *testing.T) {
 	body := []byte(`{"hello":"world"}`)
 	cp := append([]byte(nil), body...)
-	s, _ := New(githubConfig())
-	_, err := s.Sign(body, SignOptions{Secret: goldSecret, Timestamp: goldTS})
+	s, err := New(githubConfig())
+	require.NoError(t, err)
+	_, err = s.Sign(body, Options{Secret: goldSecret, Timestamp: goldTS})
 	require.NoError(t, err)
 	require.Equal(t, cp, body)
 }
@@ -123,5 +124,5 @@ func TestNewRejectsBadAlgorithm(t *testing.T) {
 
 func TestNewRejectsMissingHeader(t *testing.T) {
 	_, err := New(SigningConfig{Scheme: "hmac", Algorithm: "sha256", Encoding: "hex"})
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrInvalidConfig)
 }

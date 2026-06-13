@@ -23,7 +23,7 @@ func (_m *MockSigner) EXPECT() *MockSigner_Expecter {
 }
 
 // Sign provides a mock function with given fields: body, opts
-func (_m *MockSigner) Sign(body []byte, opts sign.SignOptions) (http.Header, error) {
+func (_m *MockSigner) Sign(body []byte, opts sign.Options) (http.Header, error) {
 	ret := _m.Called(body, opts)
 
 	if len(ret) == 0 {
@@ -32,10 +32,10 @@ func (_m *MockSigner) Sign(body []byte, opts sign.SignOptions) (http.Header, err
 
 	var r0 http.Header
 	var r1 error
-	if rf, ok := ret.Get(0).(func([]byte, sign.SignOptions) (http.Header, error)); ok {
+	if rf, ok := ret.Get(0).(func([]byte, sign.Options) (http.Header, error)); ok {
 		return rf(body, opts)
 	}
-	if rf, ok := ret.Get(0).(func([]byte, sign.SignOptions) http.Header); ok {
+	if rf, ok := ret.Get(0).(func([]byte, sign.Options) http.Header); ok {
 		r0 = rf(body, opts)
 	} else {
 		if ret.Get(0) != nil {
@@ -43,7 +43,7 @@ func (_m *MockSigner) Sign(body []byte, opts sign.SignOptions) (http.Header, err
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func([]byte, sign.SignOptions) error); ok {
+	if rf, ok := ret.Get(1).(func([]byte, sign.Options) error); ok {
 		r1 = rf(body, opts)
 	} else {
 		r1 = ret.Error(1)
@@ -59,14 +59,14 @@ type MockSigner_Sign_Call struct {
 
 // Sign is a helper method to define mock.On call
 //   - body []byte
-//   - opts sign.SignOptions
+//   - opts sign.Options
 func (_e *MockSigner_Expecter) Sign(body interface{}, opts interface{}) *MockSigner_Sign_Call {
 	return &MockSigner_Sign_Call{Call: _e.mock.On("Sign", body, opts)}
 }
 
-func (_c *MockSigner_Sign_Call) Run(run func(body []byte, opts sign.SignOptions)) *MockSigner_Sign_Call {
+func (_c *MockSigner_Sign_Call) Run(run func(body []byte, opts sign.Options)) *MockSigner_Sign_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]byte), args[1].(sign.SignOptions))
+		run(args[0].([]byte), args[1].(sign.Options))
 	})
 	return _c
 }
@@ -76,7 +76,7 @@ func (_c *MockSigner_Sign_Call) Return(_a0 http.Header, _a1 error) *MockSigner_S
 	return _c
 }
 
-func (_c *MockSigner_Sign_Call) RunAndReturn(run func([]byte, sign.SignOptions) (http.Header, error)) *MockSigner_Sign_Call {
+func (_c *MockSigner_Sign_Call) RunAndReturn(run func([]byte, sign.Options) (http.Header, error)) *MockSigner_Sign_Call {
 	_c.Call.Return(run)
 	return _c
 }

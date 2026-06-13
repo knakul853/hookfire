@@ -22,7 +22,7 @@ type hmacSigner struct {
 
 func newHMAC(cfg SigningConfig) (Signer, error) {
 	if cfg.Header == "" {
-		return nil, fmt.Errorf("sign: hmac requires a header name")
+		return nil, fmt.Errorf("%w: hmac requires a header name", ErrInvalidConfig)
 	}
 	newMAC, err := macFactory(cfg.Algorithm)
 	if err != nil {
@@ -59,7 +59,7 @@ func encoder(enc string) (func([]byte) string, error) {
 	}
 }
 
-func (s *hmacSigner) Sign(body []byte, opts SignOptions) (http.Header, error) {
+func (s *hmacSigner) Sign(body []byte, opts Options) (http.Header, error) {
 	if opts.Secret == "" {
 		return nil, ErrMissingSecret
 	}

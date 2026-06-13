@@ -1,7 +1,6 @@
 package sign
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,11 +19,13 @@ func TestNewReservesJWT(t *testing.T) {
 func TestNewNoneNeedsNoSecret(t *testing.T) {
 	s, err := New(SigningConfig{Scheme: "none"})
 	require.NoError(t, err)
-	h, err := s.Sign([]byte("x"), SignOptions{})
+	h, err := s.Sign([]byte("x"), Options{})
 	require.NoError(t, err)
 	require.Empty(t, h)
 }
 
-func TestErrUnsupportedSchemeIsSentinel(t *testing.T) {
-	require.True(t, errors.Is(ErrUnsupportedScheme, ErrUnsupportedScheme))
+func TestNewErrorsCarryContext(t *testing.T) {
+	_, err := New(SigningConfig{Scheme: "hmac", Algorithm: "md5", Encoding: "hex", Header: "X"})
+	require.ErrorIs(t, err, ErrUnsupportedScheme)
+	require.Contains(t, err.Error(), "md5")
 }

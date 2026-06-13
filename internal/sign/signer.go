@@ -10,8 +10,13 @@ import (
 var ErrUnsupportedScheme = errors.New("sign: unsupported scheme")
 
 // ErrMissingSecret is returned when a signing scheme requires a secret but
-// SignOptions.Secret is empty.
+// Options.Secret is empty.
 var ErrMissingSecret = errors.New("sign: missing secret")
+
+// ErrInvalidConfig is returned when a scheme is selected but its config is
+// incomplete (e.g. hmac without a header name), as distinct from a scheme that
+// is not supported at all (ErrUnsupportedScheme).
+var ErrInvalidConfig = errors.New("sign: invalid signing config")
 
 // SigningConfig is the declarative signing description from a provider manifest.
 // All fields except Scheme are ignored when Scheme == "none".
@@ -25,8 +30,8 @@ type SigningConfig struct {
 	AuxHeaders map[string]string // extra headers, templated with {{timestamp}}
 }
 
-// SignOptions carries the per-call inputs that are resolved upstream.
-type SignOptions struct {
+// Options carries the per-call inputs that are resolved upstream.
+type Options struct {
 	Secret    string // resolved secret; empty is an error unless Scheme=="none"
 	Timestamp int64  // unix seconds; injected (now) or pinned via --timestamp
 }
@@ -35,7 +40,7 @@ type SignOptions struct {
 type Signer interface {
 	// Sign returns the signature header(s) for body, or an error if the secret
 	// is missing/invalid. It never mutates body and never logs the secret.
-	Sign(body []byte, opts SignOptions) (http.Header, error)
+	Sign(body []byte, opts Options) (http.Header, error)
 }
 
 // New builds the Signer for cfg.Scheme, validating algorithm/encoding for hmac.

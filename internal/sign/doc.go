@@ -3,7 +3,7 @@
 //
 // It is the conformance core of hookfire: one HMAC engine (plus a no-op "none"
 // signer) expresses every launch provider's scheme as data. The signer is pure
-// and deterministic — the timestamp is injected via SignOptions and never read
+// and deterministic — the timestamp is injected via Options and never read
 // from the clock — so golden vectors are reproducible. It never mutates the
 // body and never logs the secret.
 package sign
